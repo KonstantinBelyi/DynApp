@@ -1,0 +1,130 @@
+﻿@model IEnumerable<Dyna.Areas.Analitic.Models.Marking.CleanPins>
+@{
+    ViewBag.Title = "Маркировка - Черновик";
+
+    var grid = new WebGrid(Model, canPage: false, canSort: false);
+}
+
+<div style="text-align:center">
+    <h3>Шаг 2 - Проставить черновики</h3>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <p>
+            @*"WriteDraft"*@
+            @using (Html.BeginForm("TextAreaLoadDraft", "Marking", new { area = "Analitic" }, FormMethod.Post, new { onsubmit = "return ReplaceText()" }))
+            {
+                <div class="form-group">
+                    <label for="incomingPins">Список пинов <i>(максимум 1000)</i></label>
+                    @Html.TextArea("incomingPins", new { @class = "form-control", wrap = "soft", style = "height: 400px;" })   @*onchange = "ReplaceText();*@
+                </div>
+
+                <button type="submit" class="btn btn-danger">Проверить</button>
+                <button class="btn btn-warning" onclick="document.getElementById('incomingPins').value = ''">Очистить список</button>
+            }
+        </p>
+        <p>
+            @Html.ActionLink("<< Назад", "ResetDraft", "Marking", new { area = "Analitic" }, new { @class = "btn btn-primary" })
+        </p>
+    </div>
+
+    <div class="col-md-3">
+        @*"WriteDraft"*@
+        @using (Html.BeginForm("FileLoadDraft", "Marking", new { area = "Analitic" }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="form-group">
+                <label for="listPinFile">Файл пинов</label>
+                <input onchange="ValidateExtensions(this)" name="fileLoad" type="file" class="form-control-file">
+            </div>
+            <input type="submit" id="listPinFile" value="Загрузить файл" class="btn btn-danger disabled">
+        }
+    </div>
+
+    <div class="col-md-5">
+        <p>
+            <label>@*Всего найдено дел - @Model.Count() шт.*@</label>
+            @grid.GetHtml(tableStyle: "table table-bordered",
+                              columns: grid.Columns(
+                                  grid.Column(columnName: "Count", header: "Найдено дел"),
+                                  grid.Column(columnName: "Reestr", header: "Реестр"),
+                                  grid.Column(columnName: "Draft", header: "Черновик"))
+                     )
+        </p>
+    </div>
+
+    <div class="col-md-1">
+        @if (Model.Count() > 1)
+        {
+            <p>
+                @using (Html.BeginForm("SetDraft", "Marking", new { area = "Analitic" }, FormMethod.Post))
+                {
+                    <button type="submit" class="btn btn-danger">Установить черновик</button>
+                }
+            </p>
+            <p>
+                @Html.ActionLink("Очистить таблицу", "ClearTable", "Marking", new { area = "Analitic" }, new { @class = "btn btn-warning" })
+            </p>
+            if (ViewBag.Count != null)
+            {
+                <p>Проставленно черновиков @ViewBag.Count шт.</p>
+            }
+        }
+
+    </div>
+
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        function ReplaceText() {
+            var textPin = document.getElementById("incomingPins").value;
+            var reg = /\d+/g;
+            var result = textPin.match(reg);
+            if (result == null) {
+                return false;
+            }
+            if (result.length > 1000) {
+                alert("Максимальное количество выражений в списке 1000");
+                return false;
+            } else {
+                document.getElementById("incomingPins").value = result;
+                return true;
+            }
+        }
+
+        function SetDisabled(blv) {
+            var btn = document.getElementById("listPinFile");
+            if (blv) {
+                btn.className = "btn btn-danger";
+                return;
+            }
+            btn.className = "btn btn-danger disabled";
+        }
+
+        function ValidateExtensions(inputFile) {
+            var validFileExtensions = [".xlsx"];
+            if (inputFile.type == "file") {
+                var fileName = inputFile.value;
+                if (fileName.length > 0) {
+                    var blnValid = false;
+                    for (var i = 0; i < validFileExtensions.length; i++) {
+                        var curentExt = validFileExtensions[i];
+                        if (fileName.substr(fileName.length - curentExt.length, curentExt.length).toLowerCase() == curentExt.toLowerCase()) {
+                            blnValid = true;
+                            break;
+                        }
+                    }
+                    SetDisabled(blnValid);
+                    if (!blnValid) {
+                        alert("Файл " + fileName + " имеет не верное расширение, разрешенные расширения: " + validFileExtensions.join(", "));
+                        inputFile.value = "";
+                        return false
+                    }
+                }
+            }
+            return true;
+        }
+
+    </script>
+}

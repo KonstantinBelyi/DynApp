@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewBag.Title = "Маркировка";
+}
+
+<div style="text-align:center">
+    <h2>Маркировка</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Задачи</h3>
+        @ViewBag.name
+        <div class="btn-group-vertical">
+            @Html.ActionLink("Проставить черновик", "ResetDraft", "Marking", new { area = "Analitic" }, new { @class = "btn btn-primary btn-lg" })
+
+            <button type="button" class="btn btn-primary btn-lg">#</button>
+            <button type="button" class="btn btn-primary btn-lg">#</button>
+            <button type="button" class="btn btn-primary btn-lg">#</button>
+            <button type="button" class="btn btn-primary btn-lg">#</button>
+            <button type="button" class="btn btn-primary btn-lg">#</button>
+        </div>
+    </div>
+</div>
+
